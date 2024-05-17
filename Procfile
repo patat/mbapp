@@ -1,1 +1,2 @@
 web: java -Dserver.port=$PORT $JAVA_OPTS -jar applications/basic-server/build/libs/basic-server.jar
+collector: java -Dserver.port=$PORT $JAVA_OPTS -jar applications/data-collector-server/build/libs/data-collector-server.jar

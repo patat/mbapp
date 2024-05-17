@@ -7,6 +7,10 @@ include(
 
     "components:data-collector",
     "components:data-analyzer",
+    "components:movie",
 
-    "support:workflow-support"
+    "support:workflow-support",
+    "support:rabbit-support",
+
+    "databases:mb-db"
 )
