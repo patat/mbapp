@@ -2,15 +2,9 @@ package io.initialcapacity.collector
 
 import com.rabbitmq.client.ConnectionFactory
 import io.initialcapacity.rabbitsupport.*
-import io.ktor.http.*
 import io.ktor.server.application.Application
-import io.ktor.server.application.call
-import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.response.*
-import io.ktor.server.routing.get
-import io.ktor.server.routing.Routing
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
@@ -40,31 +34,14 @@ fun Application.module() {
 
     listenForCollectMoviesRequests(
             connectionFactory,
-            collectMoviesExchange,
             collectMoviesQueue,
             worker = CollectMoviesWorker(dbConfig.db),
             logger,
     )
-
-    install(Routing) {
-        get("/") {
-            call.respondText("hello!", ContentType.Text.Html)
-        }
-
-        get("/collect-movies") {
-            val publishCollectMovies = publish(connectionFactory, collectMoviesExchange)
-
-            logger.debug("publishing collect movies")
-            publishCollectMovies("collect movies")
-
-            call.respondText("collect movies published!", ContentType.Text.Html)
-        }
-    }
 }
 
 fun CoroutineScope.listenForCollectMoviesRequests(
         connectionFactory: ConnectionFactory,
-        collectMoviesExchange: RabbitExchange,
         collectMoviesQueue: RabbitQueue,
         worker: CollectMoviesWorker,
         logger: Logger

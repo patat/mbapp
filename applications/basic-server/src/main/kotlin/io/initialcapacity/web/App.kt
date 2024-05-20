@@ -1,6 +1,7 @@
 package io.initialcapacity.web
 
 import freemarker.cache.ClassTemplateLoader
+import io.ktor.http.*
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -10,13 +11,31 @@ import io.ktor.server.freemarker.FreeMarker
 import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
-import io.ktor.server.response.respond
+import io.ktor.server.response.*
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.util.pipeline.PipelineContext
 import java.util.*
+import org.slf4j.LoggerFactory
+import io.initialcapacity.rabbitsupport.*
+import java.net.URI
 
 fun Application.module() {
+    val logger = LoggerFactory.getLogger(this.javaClass)
+
+    val rabbitUrl = System.getenv("RABBIT_URL")?.let(::URI)
+            ?: throw RuntimeException("Please set the RABBIT_URL environment variable")
+
+    val connectionFactory = buildConnectionFactory(rabbitUrl)
+    val collectMoviesExchange = RabbitExchange(
+            name = "collect-movies-exchange",
+            type = "direct",
+            routingKeyGenerator = { _: String -> "42" },
+            bindingKey = "42",
+    )
+    val collectMoviesQueue = RabbitQueue("collect-movies")
+    connectionFactory.declareAndBind(exchange = collectMoviesExchange, queue = collectMoviesQueue)
+
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
@@ -26,6 +45,15 @@ fun Application.module() {
         }
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
+
+        get("/collect-movies") {
+            val publishCollectMovies = publish(connectionFactory, collectMoviesExchange)
+
+            logger.debug("publishing collect movies")
+            publishCollectMovies("collect movies")
+
+            call.respondText("collect movies published!", ContentType.Text.Html)
+        }
     }
 }
 
