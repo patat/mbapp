@@ -1,7 +1,7 @@
 val exposedVersion: String by project
 
 dependencies {
-    implementation(project(":components:movie"))
+    implementation(project(":components:model"))
     implementation(project(":support:workflow-support"))
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

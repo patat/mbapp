@@ -7,7 +7,8 @@ include(
 
     "components:data-collector",
     "components:data-analyzer",
-    "components:movie",
+    "components:results-awaiter",
+    "components:model",
 
     "support:workflow-support",
     "support:rabbit-support",

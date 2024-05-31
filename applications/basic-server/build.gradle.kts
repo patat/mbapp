@@ -6,14 +6,24 @@ group = "io.initialcapacity.web"
 
 val ktorVersion: String by project
 val rabbitVersion: String by project
+val exposedVersion: String by project
+val hikariVersion: String by project
+val postgresVersion: String by project
 
 dependencies {
-    implementation(project(":components:data-analyzer"))
+    implementation(project(":components:results-awaiter"))
     implementation(project(":support:rabbit-support"))
+
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
+    implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.rabbitmq:amqp-client:$rabbitVersion")
 
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
