@@ -53,6 +53,21 @@ class DataGateway(private val db: Database) {
             it.toMovie()
         }
     }
+
+    fun createRound(battleId: Long) = transaction(db) {
+        val savedRoundId = RoundTable.insert { it[this.battleId] = battleId }
+                .getOrNull(RoundTable.id) ?: throw RuntimeException("Couldn't create next round")
+
+        savedRoundId.value
+    }
+
+    fun getRoundById(roundId: Long) = transaction(db) {
+        RoundTable
+                .select { RoundTable.id eq roundId }
+                .limit(BATTLE_MOVIES_COUNT).map {
+                    it.toRound()
+                }[0]
+    }
 }
 
 private object MovieBattleRelationTable : Table("movies_battles_relation") {

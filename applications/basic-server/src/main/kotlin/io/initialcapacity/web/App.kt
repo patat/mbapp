@@ -13,8 +13,6 @@ import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.netty.Netty
 import io.ktor.server.response.*
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.get
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -25,6 +23,9 @@ import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.encodeToString
 import io.ktor.serialization.kotlinx.json.*
 import java.net.URI
+import io.initialcapacity.model.Movie
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
 
 fun Application.module() {
     val logger = LoggerFactory.getLogger(this.javaClass)
@@ -55,6 +56,15 @@ fun Application.module() {
     )
     val showcaseMoviesQueue = RabbitQueue("showcase-movies")
     connectionFactory.declareAndBind(exchange = battlesExchange, queue = showcaseMoviesQueue)
+
+    val roundsExchange = RabbitExchange(
+            name = "rounds-exchange",
+            type = "direct",
+            routingKeyGenerator = { _: String -> "42" },
+            bindingKey = "42",
+    )
+    val roundsQueue = RabbitQueue("next-round")
+    connectionFactory.declareAndBind(exchange = roundsExchange, queue = roundsQueue)
 
     val resultsAwaiter = ResultsAwaiter(dbConfig.db)
 
@@ -91,7 +101,28 @@ fun Application.module() {
 
             val movies = resultsAwaiter.waitForBattleMovies(battleId)
 
-            call.respond(movies)
+            call.respond(ShowcaseMoviesResponse(battleId, movies))
+        }
+
+        post("/next-round") {
+            val nextRoundRequest = call.receive<NextRoundRequest>()
+            val roundId = resultsAwaiter.createNextRound(nextRoundRequest.battleId)
+
+            logger.debug("publishing next round")
+            val publishNextRound = publish(connectionFactory, roundsExchange)
+            val message = Json.encodeToString(
+                    NextRoundMessage(
+                            battleId = nextRoundRequest.battleId,
+                            nextRoundId = roundId,
+                            prevRoundId = nextRoundRequest.roundId,
+                            winnerId = nextRoundRequest.winnerId
+                    )
+            )
+            publishNextRound(message)
+
+            val round = resultsAwaiter.waitForRound(roundId)
+
+            call.respond(round)
         }
     }
 }
@@ -99,6 +130,27 @@ fun Application.module() {
 @Serializable
 private data class ShowcaseMoviesMessage(
       val battleId: Long
+)
+
+@Serializable
+private data class ShowcaseMoviesResponse(
+        val battleId: Long,
+        val movies: List<Movie>
+)
+
+@Serializable
+private data class NextRoundRequest(
+        val battleId: Long,
+        val roundId: Long,
+        val winnerId: Long?,
+)
+
+@Serializable
+private data class NextRoundMessage(
+        val battleId: Long,
+        val nextRoundId: Long,
+        val prevRoundId: Long?,
+        val winnerId: Long?,
 )
 
 private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String, String> {

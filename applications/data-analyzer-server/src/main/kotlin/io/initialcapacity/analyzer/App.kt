@@ -60,6 +60,23 @@ fun CoroutineScope.listenForShowcaseMoviesRequests(
     }
 }
 
+fun CoroutineScope.listenForNextRoundRequests(
+        connectionFactory: ConnectionFactory,
+        roundQueue: RabbitQueue,
+        worker: NextRoundWorker,
+        logger: Logger
+) {
+    launch {
+        logger.info("listening for next round requests")
+        val channel = connectionFactory.newConnection().createChannel()
+        listen(queue = roundQueue, channel = channel) {
+            logger.debug("received next round request")
+            val message = Json.decodeFromString<NextRoundMessage>(it)
+            worker.setNextRound(message)
+        }
+    }
+}
+
 @Serializable
 private data class ShowcaseMoviesMessage(
     val battleId: Long,
