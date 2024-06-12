@@ -67,7 +67,7 @@ class ResultsAwaiter(private val db: Database) {
 
             val round = gateway.getRoundById(roundId)
 
-            if (round.movie1Id != null && round.movie2Id != null) {
+            if (round.movie1Id != null && round.movie2Id != null || round.winnerId != null) {
                 roundDeferred.complete(round)
                 return@repeat
             }

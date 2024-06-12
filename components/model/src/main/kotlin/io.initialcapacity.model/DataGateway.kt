@@ -1,9 +1,6 @@
 package io.initialcapacity.model
 
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 val BATTLE_MOVIES_COUNT = 16
@@ -67,6 +64,29 @@ class DataGateway(private val db: Database) {
                 .limit(BATTLE_MOVIES_COUNT).map {
                     it.toRound()
                 }[0]
+    }
+
+    fun updateRound(roundId: Long, round: Round) = transaction(db) {
+        val savedRound = RoundTable
+                .select { RoundTable.id eq roundId }
+                .limit(BATTLE_MOVIES_COUNT).map {
+                    it.toRound()
+                }[0]
+
+        RoundTable
+                .update ({ RoundTable.id eq roundId }) {
+                    it[winnerId] = round.winnerId ?: savedRound.winnerId
+                    it[movie1Id] = round.movie1Id ?: savedRound.movie1Id
+                    it[movie2Id] = round.movie2Id ?: savedRound.movie2Id
+                }
+    }
+
+    fun getBattleRounds(battleId: Long) = transaction(db) {
+        RoundTable
+                .select { RoundTable.battleId eq battleId }
+                .map {
+                    it.toRound()
+                }
     }
 }
 

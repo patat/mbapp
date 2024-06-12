@@ -81,6 +81,7 @@ fun Application.module() {
         }
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
+        staticResources("/static/scripts", "static/scripts")
 
         get("/collect-movies") {
             val publishCollectMovies = publish(connectionFactory, moviesExchange)
@@ -105,10 +106,10 @@ fun Application.module() {
         }
 
         post("/next-round") {
+            logger.debug("publishing next round")
             val nextRoundRequest = call.receive<NextRoundRequest>()
             val roundId = resultsAwaiter.createNextRound(nextRoundRequest.battleId)
 
-            logger.debug("publishing next round")
             val publishNextRound = publish(connectionFactory, roundsExchange)
             val message = Json.encodeToString(
                     NextRoundMessage(
@@ -141,7 +142,7 @@ private data class ShowcaseMoviesResponse(
 @Serializable
 private data class NextRoundRequest(
         val battleId: Long,
-        val roundId: Long,
+        val roundId: Long?,
         val winnerId: Long?,
 )
 

@@ -35,10 +35,26 @@ fun Application.module() {
     val showcaseMoviesQueue = RabbitQueue("showcase-movies")
     connectionFactory.declareAndBind(exchange = battlesExchange, queue = showcaseMoviesQueue)
 
+    val roundsExchange = RabbitExchange(
+            name = "rounds-exchange",
+            type = "direct",
+            routingKeyGenerator = { _: String -> "42" },
+            bindingKey = "42",
+    )
+    val roundsQueue = RabbitQueue("next-round")
+    connectionFactory.declareAndBind(exchange = roundsExchange, queue = roundsQueue)
+
     listenForShowcaseMoviesRequests(
             connectionFactory,
             showcaseMoviesQueue,
             worker = ShowcaseMoviesWorker(dbConfig.db),
+            logger,
+    )
+
+    listenForNextRoundRequests(
+            connectionFactory,
+            roundsQueue,
+            worker = NextRoundWorker(dbConfig.db),
             logger,
     )
 }

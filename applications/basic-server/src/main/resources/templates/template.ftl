@@ -1,4 +1,4 @@
-<#macro noauthentication title="Welcome">
+<#macro noauthentication title="MBApp">
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -7,28 +7,23 @@
         <link rel="stylesheet" href="/static/styles/reset.css">
         <link rel="stylesheet" href="/static/styles/style.css">
         <link rel="icon" type="image/svg" href="/static/images/favicon.svg">
-        <title>Kotlin ktor starter</title>
+        <title>Movie Battle App</title>
     </head>
     <body>
     <header>
         <div class="container">
-            <h1>Kotlin ktor starter</h1>
+            <h1>Movie Battle App</h1>
         </div>
     </header>
-    <section class="callout">
-        <div class="container">
-            an <span class="branded">AppContinuum[]</span> application with background workers.
-        </div>
-    </section>
     <main>
         <#nested>
     </main>
     <footer>
         <div class="container">
-            <script>document.write("©" + new Date().getFullYear());</script>
-            Initial Capacity, Inc. All rights reserved.
+            Let movies fight to be watched.
         </div>
     </footer>
+    <script src="/static/scripts/main.js"></script>
     </body>
     </html>
 </#macro>

@@ -1,8 +1,10 @@
 package io.initialcapacity.model
 
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.ResultRow
 
+@Serializable
 data class Round(
         val id: Long? = null,
         val battleId: Long,
@@ -13,9 +15,9 @@ data class Round(
 
 object RoundTable : LongIdTable("rounds") {
     val battleId = long("battle_id")
-    val movie1Id = long("movie1_id")
-    val movie2Id = long("movie2_id")
-    val winnerId = long("winner_id")
+    val movie1Id = long("movie1_id").nullable()
+    val movie2Id = long("movie2_id").nullable()
+    val winnerId = long("winner_id").nullable()
 }
 
 fun ResultRow.toRound() = Round(
