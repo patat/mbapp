@@ -2,43 +2,12 @@ package io.initialcapacity.collector
 
 import com.rabbitmq.client.ConnectionFactory
 import io.initialcapacity.rabbitsupport.*
-import io.ktor.server.application.Application
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
-import java.util.*
 import java.net.URI
 import org.slf4j.LoggerFactory
-
-fun Application.module() {
-    val logger = LoggerFactory.getLogger(this.javaClass)
-
-    val rabbitUrl = System.getenv("RABBIT_URL")?.let(::URI)
-        ?: throw RuntimeException("Please set the RABBIT_URL environment variable")
-    val dbUrl = System.getenv("DATABASE_URL")
-        ?: throw RuntimeException("Please set the DATABASE_URL environment variable")
-
-    val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
-
-    val connectionFactory = buildConnectionFactory(rabbitUrl)
-    val collectMoviesExchange = RabbitExchange(
-            name = "collect-movies-exchange",
-            type = "direct",
-            routingKeyGenerator = { _: String -> "42" },
-            bindingKey = "42",
-    )
-    val collectMoviesQueue = RabbitQueue("collect-movies")
-    connectionFactory.declareAndBind(exchange = collectMoviesExchange, queue = collectMoviesQueue)
-
-    listenForCollectMoviesRequests(
-            connectionFactory,
-            collectMoviesQueue,
-            worker = CollectMoviesWorker(dbConfig.db),
-            logger,
-    )
-}
 
 fun CoroutineScope.listenForCollectMoviesRequests(
         connectionFactory: ConnectionFactory,
@@ -57,7 +26,31 @@ fun CoroutineScope.listenForCollectMoviesRequests(
 }
 
 fun main() {
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    val port = System.getenv("PORT")?.toInt() ?: 8886
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module() }).start(wait = true)
+    runBlocking {
+        val logger = LoggerFactory.getLogger(this.javaClass)
+
+        val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
+                ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
+        val dbUrl = System.getenv("JDBC_DATABASE_URL")
+                ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
+
+        val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
+
+        val connectionFactory = buildConnectionFactory(rabbitUrl)
+        val collectMoviesExchange = RabbitExchange(
+            name = "collect-movies-exchange",
+            type = "direct",
+            routingKeyGenerator = { _: String -> "42" },
+            bindingKey = "42",
+        )
+        val collectMoviesQueue = RabbitQueue("collect-movies")
+        connectionFactory.declareAndBind(exchange = collectMoviesExchange, queue = collectMoviesQueue)
+
+        listenForCollectMoviesRequests(
+            connectionFactory,
+            collectMoviesQueue,
+            worker = CollectMoviesWorker(dbConfig.db),
+            logger,
+        )
+    }
 }

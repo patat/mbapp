@@ -30,11 +30,11 @@ import io.ktor.server.routing.*
 fun Application.module() {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
-    val rabbitUrl = System.getenv("RABBIT_URL")?.let(::URI)
-            ?: throw RuntimeException("Please set the RABBIT_URL environment variable")
+    val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
+            ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
 
-    val dbUrl = System.getenv("DATABASE_URL")
-            ?: throw RuntimeException("Please set the DATABASE_URL environment variable")
+    val dbUrl = System.getenv("JDBC_DATABASE_URL")
+            ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
 
     val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
 
