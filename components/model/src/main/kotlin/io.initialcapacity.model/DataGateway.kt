@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 val BATTLE_MOVIES_COUNT = 16
 class DataGateway(private val db: Database) {
-
+    //
     fun getMovies() = transaction(db) {
         MovieTable
                 .select { MovieTable.tmdbId greater 0 }
