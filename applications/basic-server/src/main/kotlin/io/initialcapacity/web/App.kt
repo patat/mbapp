@@ -86,7 +86,7 @@ fun Application.module() {
         get("/collect-movies") {
             val publishCollectMovies = publish(connectionFactory, moviesExchange)
 
-            logger.debug("publishing collect movies")
+            logger.info("publishing collect movies")
             publishCollectMovies("collect movies")
 
             call.respondText("collect movies published!", ContentType.Text.Html)
@@ -95,7 +95,7 @@ fun Application.module() {
         get("/showcase-movies") {
             val battleId = resultsAwaiter.createBattle()
 
-            logger.debug("publishing showcase movies")
+            logger.info("publishing showcase movies")
             val publishShowcaseMovies = publish(connectionFactory, battlesExchange)
             val message = Json.encodeToString(ShowcaseMoviesMessage(battleId))
             publishShowcaseMovies(message)
@@ -106,7 +106,7 @@ fun Application.module() {
         }
 
         post("/next-round") {
-            logger.debug("publishing next round")
+            logger.info("publishing next round")
             val nextRoundRequest = call.receive<NextRoundRequest>()
             val roundId = resultsAwaiter.createNextRound(nextRoundRequest.battleId)
 

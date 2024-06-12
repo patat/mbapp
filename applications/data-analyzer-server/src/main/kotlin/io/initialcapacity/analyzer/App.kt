@@ -22,7 +22,7 @@ fun CoroutineScope.listenForShowcaseMoviesRequests(
         logger.info("listening for showcase movies requests")
         val channel = connectionFactory.newConnection().createChannel()
         listen(queue = showcaseMoviesQueue, channel = channel) {
-            logger.debug("received showcase movies request")
+            logger.info("received showcase movies request")
             val message = Json.decodeFromString<ShowcaseMoviesMessage>(it)
             worker.setBattleMovies(message.battleId)
         }
@@ -39,7 +39,7 @@ fun CoroutineScope.listenForNextRoundRequests(
         logger.info("listening for next round requests")
         val channel = connectionFactory.newConnection().createChannel()
         listen(queue = roundQueue, channel = channel) {
-            logger.debug("received next round request")
+            logger.info("received next round request")
             val message = Json.decodeFromString<NextRoundMessage>(it)
             worker.setNextRound(message)
         }

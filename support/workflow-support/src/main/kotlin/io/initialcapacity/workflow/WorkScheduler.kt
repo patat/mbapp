@@ -43,7 +43,7 @@ class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: M
 
     private fun checkForWork(worker: Worker<T>): () -> Unit {
         return {
-            logger.debug("checking for work for {}", worker.name)
+            logger.info("checking for work for {}", worker.name)
 
             finder.findRequested(worker.name).forEach {
 
@@ -62,7 +62,7 @@ class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: M
                     }
                 }
             }
-            logger.debug("done checking for work for {}", worker.name)
+            logger.info("done checking for work for {}", worker.name)
         }
     }
 }

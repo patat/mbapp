@@ -19,7 +19,7 @@ fun CoroutineScope.listenForCollectMoviesRequests(
         logger.info("listening for collect movies requests")
         val channel = connectionFactory.newConnection().createChannel()
         listen(queue = collectMoviesQueue, channel = channel) {
-            logger.debug("received collect movies request")
+            logger.info("received collect movies request")
             worker.execute()
         }
     }
