@@ -1,5 +1,6 @@
 package io.initialcapacity.web
 
+import com.rabbitmq.client.ConnectionFactory
 import freemarker.cache.ClassTemplateLoader
 import io.initialcapacity.awaiter.ResultsAwaiter
 import io.ktor.http.*
@@ -18,63 +19,33 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.util.*
 import org.slf4j.LoggerFactory
-import io.initialcapacity.rabbitsupport.*
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.encodeToString
 import io.ktor.serialization.kotlinx.json.*
 import java.net.URI
 import io.initialcapacity.model.Movie
+import io.initialcapacity.queue.MessageQueue
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 
-fun Application.module() {
+fun Application.module(
+    dbConfig: DatabaseConfiguration,
+    collectMoviesQueue: MessageQueue,
+    showcaseMoviesQueue: MessageQueue,
+    nextRoundQueue: MessageQueue,
+
+) {
     val logger = LoggerFactory.getLogger(this.javaClass)
-
-    val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
-            ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
-
-    val dbUrl = System.getenv("JDBC_DATABASE_URL")
-            ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
-
-    val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
-
-    val connectionFactory = buildConnectionFactory(rabbitUrl)
-    val moviesExchange = RabbitExchange(
-            name = "movies-exchange",
-            type = "direct",
-            routingKeyGenerator = { _: String -> "42" },
-            bindingKey = "42",
-    )
-    val collectMoviesQueue = RabbitQueue("collect-movies")
-    connectionFactory.declareAndBind(exchange = moviesExchange, queue = collectMoviesQueue)
-
-    val battlesExchange = RabbitExchange(
-            name = "battles-exchange",
-            type = "direct",
-            routingKeyGenerator = { _: String -> "42" },
-            bindingKey = "42",
-    )
-    val showcaseMoviesQueue = RabbitQueue("showcase-movies")
-    connectionFactory.declareAndBind(exchange = battlesExchange, queue = showcaseMoviesQueue)
-
-    val roundsExchange = RabbitExchange(
-            name = "rounds-exchange",
-            type = "direct",
-            routingKeyGenerator = { _: String -> "42" },
-            bindingKey = "42",
-    )
-    val roundsQueue = RabbitQueue("next-round")
-    connectionFactory.declareAndBind(exchange = roundsExchange, queue = roundsQueue)
 
     val resultsAwaiter = ResultsAwaiter(dbConfig.db)
 
     install(ContentNegotiation) {
         json()
     }
-
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
+
     install(Routing) {
         get("/") {
             call.respond(FreeMarkerContent("index.ftl", mapOf("headers" to headers())))
@@ -84,10 +55,8 @@ fun Application.module() {
         staticResources("/static/scripts", "static/scripts")
 
         get("/collect-movies") {
-            val publishCollectMovies = publish(connectionFactory, moviesExchange)
-
             logger.info("publishing collect movies")
-            publishCollectMovies("collect movies")
+            collectMoviesQueue.publishMessage("collect movies")
 
             call.respondText("collect movies published!", ContentType.Text.Html)
         }
@@ -96,9 +65,8 @@ fun Application.module() {
             val battleId = resultsAwaiter.createBattle()
 
             logger.info("publishing showcase movies")
-            val publishShowcaseMovies = publish(connectionFactory, battlesExchange)
             val message = Json.encodeToString(ShowcaseMoviesMessage(battleId))
-            publishShowcaseMovies(message)
+            showcaseMoviesQueue.publishMessage(message)
 
             val movies = resultsAwaiter.waitForBattleMovies(battleId)
 
@@ -109,8 +77,6 @@ fun Application.module() {
             logger.info("publishing next round")
             val nextRoundRequest = call.receive<NextRoundRequest>()
             val roundId = resultsAwaiter.createNextRound(nextRoundRequest.battleId)
-
-            val publishNextRound = publish(connectionFactory, roundsExchange)
             val message = Json.encodeToString(
                     NextRoundMessage(
                             battleId = nextRoundRequest.battleId,
@@ -119,7 +85,7 @@ fun Application.module() {
                             winnerId = nextRoundRequest.winnerId
                     )
             )
-            publishNextRound(message)
+            nextRoundQueue.publishMessage(message)
 
             val round = resultsAwaiter.waitForRound(roundId)
 
@@ -162,8 +128,47 @@ private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String,
     return headers
 }
 
+fun startServer(
+    port: Int,
+    rabbitUrl: URI,
+    dbUrl: String
+) {
+    val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
+
+    val collectMoviesQueue = MessageQueue(
+            rabbitUrl = rabbitUrl,
+            exchangeName = "collect-movies-exchange",
+            queueName = "collect-movies-queue"
+    )
+
+    val showcaseMoviesQueue = MessageQueue(
+            rabbitUrl = rabbitUrl,
+            exchangeName = "showcase-movies-exchange",
+            queueName = "showcase-movies-queue"
+    )
+
+    val nextRoundQueue = MessageQueue(
+            rabbitUrl = rabbitUrl,
+            exchangeName = "next-round-exchange",
+            queueName = "next-round-queue"
+    )
+
+    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module(
+            dbConfig = dbConfig,
+            collectMoviesQueue = collectMoviesQueue,
+            showcaseMoviesQueue = showcaseMoviesQueue,
+            nextRoundQueue = nextRoundQueue,
+    ) }).start(wait = true)
+}
+
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     val port = System.getenv("PORT")?.toInt() ?: 8888
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module() }).start(wait = true)
+    val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
+            ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
+
+    val dbUrl = System.getenv("JDBC_DATABASE_URL")
+            ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
+
+    startServer(port = port, rabbitUrl = rabbitUrl, dbUrl = dbUrl)
 }

@@ -9,6 +9,7 @@ include(
     "components:data-analyzer",
     "components:results-awaiter",
     "components:model",
+    "components:queue",
 
     "support:workflow-support",
     "support:rabbit-support",

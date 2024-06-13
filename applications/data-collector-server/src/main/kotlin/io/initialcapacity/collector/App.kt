@@ -1,7 +1,6 @@
 package io.initialcapacity.collector
 
-import com.rabbitmq.client.ConnectionFactory
-import io.initialcapacity.rabbitsupport.*
+import io.initialcapacity.queue.MessageQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -10,15 +9,13 @@ import java.net.URI
 import org.slf4j.LoggerFactory
 
 fun CoroutineScope.listenForCollectMoviesRequests(
-        connectionFactory: ConnectionFactory,
-        collectMoviesQueue: RabbitQueue,
+        collectMoviesQueue: MessageQueue,
         worker: CollectMoviesWorker,
         logger: Logger
 ) {
     launch {
         logger.info("listening for collect movies requests")
-        val channel = connectionFactory.newConnection().createChannel()
-        listen(queue = collectMoviesQueue, channel = channel) {
+        collectMoviesQueue.listenToMessages {
             logger.info("received collect movies request")
             worker.execute()
         }
@@ -36,18 +33,13 @@ fun main() {
 
         val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
 
-        val connectionFactory = buildConnectionFactory(rabbitUrl)
-        val collectMoviesExchange = RabbitExchange(
-            name = "collect-movies-exchange",
-            type = "direct",
-            routingKeyGenerator = { _: String -> "42" },
-            bindingKey = "42",
+        val collectMoviesQueue = MessageQueue(
+                rabbitUrl = rabbitUrl,
+                exchangeName = "collect-movies-exchange",
+                queueName = "collect-movies-queue"
         )
-        val collectMoviesQueue = RabbitQueue("collect-movies")
-        connectionFactory.declareAndBind(exchange = collectMoviesExchange, queue = collectMoviesQueue)
 
         listenForCollectMoviesRequests(
-            connectionFactory,
             collectMoviesQueue,
             worker = CollectMoviesWorker(dbConfig.db),
             logger,

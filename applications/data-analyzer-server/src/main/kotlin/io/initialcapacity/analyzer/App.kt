@@ -1,8 +1,7 @@
 package io.initialcapacity.analyzer
 
-import com.rabbitmq.client.ConnectionFactory
 import io.initialcapacity.collector.DatabaseConfiguration
-import io.initialcapacity.rabbitsupport.*
+import io.initialcapacity.queue.MessageQueue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -13,15 +12,13 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 fun CoroutineScope.listenForShowcaseMoviesRequests(
-        connectionFactory: ConnectionFactory,
-        showcaseMoviesQueue: RabbitQueue,
+        showcaseMoviesQueue: MessageQueue,
         worker: ShowcaseMoviesWorker,
         logger: Logger
 ) {
     launch {
         logger.info("listening for showcase movies requests")
-        val channel = connectionFactory.newConnection().createChannel()
-        listen(queue = showcaseMoviesQueue, channel = channel) {
+        showcaseMoviesQueue.listenToMessages {
             logger.info("received showcase movies request")
             val message = Json.decodeFromString<ShowcaseMoviesMessage>(it)
             worker.setBattleMovies(message.battleId)
@@ -30,15 +27,13 @@ fun CoroutineScope.listenForShowcaseMoviesRequests(
 }
 
 fun CoroutineScope.listenForNextRoundRequests(
-        connectionFactory: ConnectionFactory,
-        roundQueue: RabbitQueue,
+        nextRoundQueue: MessageQueue,
         worker: NextRoundWorker,
         logger: Logger
 ) {
     launch {
         logger.info("listening for next round requests")
-        val channel = connectionFactory.newConnection().createChannel()
-        listen(queue = roundQueue, channel = channel) {
+        nextRoundQueue.listenToMessages {
             logger.info("received next round request")
             val message = Json.decodeFromString<NextRoundMessage>(it)
             worker.setNextRound(message)
@@ -62,35 +57,26 @@ fun main() {
 
         val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
 
-        val connectionFactory = buildConnectionFactory(rabbitUrl)
-        val battlesExchange = RabbitExchange(
-                name = "battles-exchange",
-                type = "direct",
-                routingKeyGenerator = { _: String -> "42" },
-                bindingKey = "42",
+        val showcaseMoviesQueue = MessageQueue(
+            rabbitUrl = rabbitUrl,
+            exchangeName = "showcase-movies-exchange",
+            queueName = "showcase-movies-queue"
         )
-        val showcaseMoviesQueue = RabbitQueue("showcase-movies")
-        connectionFactory.declareAndBind(exchange = battlesExchange, queue = showcaseMoviesQueue)
 
-        val roundsExchange = RabbitExchange(
-                name = "rounds-exchange",
-                type = "direct",
-                routingKeyGenerator = { _: String -> "42" },
-                bindingKey = "42",
-        )
-        val roundsQueue = RabbitQueue("next-round")
-        connectionFactory.declareAndBind(exchange = roundsExchange, queue = roundsQueue)
+        val nextRoundQueue = MessageQueue(
+            rabbitUrl = rabbitUrl,
+            exchangeName = "next-round-exchange",
+            queueName = "next-round-queue"
+        );
 
         listenForShowcaseMoviesRequests(
-                connectionFactory,
-                showcaseMoviesQueue,
+                showcaseMoviesQueue = showcaseMoviesQueue,
                 worker = ShowcaseMoviesWorker(dbConfig.db),
                 logger,
         )
 
         listenForNextRoundRequests(
-                connectionFactory,
-                roundsQueue,
+                nextRoundQueue = nextRoundQueue,
                 worker = NextRoundWorker(dbConfig.db),
                 logger,
         )

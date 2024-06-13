@@ -13,7 +13,7 @@ val postgresVersion: String by project
 dependencies {
     implementation(project(":components:results-awaiter"))
     implementation(project(":components:model"))
-    implementation(project(":support:rabbit-support"))
+    implementation(project(":components:queue"))
 
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")

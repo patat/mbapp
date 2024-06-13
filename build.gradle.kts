@@ -3,6 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22" apply false
 }
 
+repositories {
+    mavenCentral()
+}
+
 subprojects {
     if (listOf("applications", "components", "support").contains(name)) return@subprojects
 

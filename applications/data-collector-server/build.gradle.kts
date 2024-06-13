@@ -12,7 +12,7 @@ val rabbitVersion: String by project
 
 dependencies {
     implementation(project(":components:data-collector"))
-    implementation(project(":support:rabbit-support"))
+    implementation(project(":components:queue"))
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")
