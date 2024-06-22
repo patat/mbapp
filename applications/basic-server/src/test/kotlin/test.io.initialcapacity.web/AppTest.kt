@@ -39,8 +39,9 @@ class AppTest {
         val resultsAwaiter = ResultsAwaiter(dataGatewayMock)
         showcaseMoviesQueueMock = mockk<MessageQueue>()
         nextRoundQueueMock = mockk<MessageQueue>()
+        val collectMoviesQueueMock = mockk<MessageQueue>()
 
-        server = webServer(port, resultsAwaiter, showcaseMoviesQueueMock, nextRoundQueueMock)
+        server = webServer(port, resultsAwaiter, showcaseMoviesQueueMock, nextRoundQueueMock, collectMoviesQueueMock)
 
         server.start(wait = false)
     }

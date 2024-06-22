@@ -31,6 +31,7 @@ fun Application.module(
     resultsAwaiter: ResultsAwaiter,
     showcaseMoviesQueue: MessageQueue,
     nextRoundQueue: MessageQueue,
+    collectMoviesQueue: MessageQueue
 
 ) {
     val logger = LoggerFactory.getLogger(this.javaClass)
@@ -49,6 +50,14 @@ fun Application.module(
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
         staticResources("/static/scripts", "static/scripts")
+
+        get("/collect-movies") {
+            logger.info("publishing collect movies")
+
+            collectMoviesQueue.publishMessage("collect movies")
+
+            call.respondText("Published collect movies")
+        }
 
         get("/showcase-movies") {
             val battleId = resultsAwaiter.createBattle()
@@ -122,10 +131,12 @@ fun webServer(
     resultsAwaiter: ResultsAwaiter,
     showcaseMoviesQueue: MessageQueue,
     nextRoundQueue: MessageQueue,
+    collectMoviesQueue: MessageQueue,
 ) = embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module(
     resultsAwaiter,
     showcaseMoviesQueue,
     nextRoundQueue,
+    collectMoviesQueue,
 )})
 
 fun main() {
@@ -153,10 +164,17 @@ fun main() {
             queueName = "next-round-queue"
     )
 
+    val collectMoviesQueue = MessageQueue(
+        rabbitUrl = rabbitUrl,
+        exchangeName = "collect-movies-exchange",
+        queueName = "collect-movies-queue"
+    )
+
     webServer(
         port,
         resultsAwaiter,
         showcaseMoviesQueue,
-        nextRoundQueue
+        nextRoundQueue,
+        collectMoviesQueue
     ).start(wait = true)
 }
