@@ -40,8 +40,8 @@ task<JavaExec>("run") {
     environment("CLOUDAMQP_URL", "amqp://localhost:5672")
 }
 
-tasks.test {
-    exclude("**/*")
+tasks.create("stage") {
+    dependsOn("assemble")
 }
 
 tasks {
