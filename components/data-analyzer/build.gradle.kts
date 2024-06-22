@@ -7,7 +7,8 @@ val ktorVersion: String by project
 
 dependencies {
     implementation(project(":components:model"))
-    implementation(project(":support:workflow-support"))
+    implementation(project(":components:queue"))
+    implementation(project(":components:results-awaiter"))
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

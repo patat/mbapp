@@ -1,5 +1,6 @@
 package io.initialcapacity.awaiter
 
+import io.initialcapacity.model.BATTLE_MOVIES_COUNT
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import io.initialcapacity.model.DataGateway
@@ -7,16 +8,13 @@ import io.initialcapacity.model.Movie
 import io.initialcapacity.model.Round
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
-import org.jetbrains.exposed.sql.Database
 
-class ResultsAwaiter(private val db: Database) {
+class ResultsAwaiter(private val gateway: DataGateway) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun createBattle(): Long {
         return runBlocking {
             logger.info("starting to create battle.")
-
-            val gateway = DataGateway(db)
 
             val battleID = gateway.createBattle()
 
@@ -28,7 +26,6 @@ class ResultsAwaiter(private val db: Database) {
 
     suspend fun waitForBattleMovies(battleId: Long): List<Movie> {
         val moviesDeferred = CompletableDeferred<List<Movie>>()
-        val gateway = DataGateway(db)
 
         repeat(5) {
             delay(200)
@@ -48,8 +45,6 @@ class ResultsAwaiter(private val db: Database) {
         return runBlocking {
             logger.info("starting to create next round in battle $battleId")
 
-            val gateway = DataGateway(db)
-
             val roundId = gateway.createRound(battleId)
 
             logger.info("completed to create next round $roundId in battle $battleId")
@@ -60,7 +55,6 @@ class ResultsAwaiter(private val db: Database) {
 
     suspend fun waitForRound(roundId: Long): Round {
         val roundDeferred = CompletableDeferred<Round>()
-        val gateway = DataGateway(db)
 
         repeat(5) {
             delay(200)

@@ -21,6 +21,14 @@ tasks.register<org.flywaydb.gradle.task.FlywayCleanTask>("devClean") {
     url = "jdbc:postgresql://localhost:5432/mb_dev?user=mbapp&password=mbapp_password"
 }
 
+tasks.register<org.flywaydb.gradle.task.FlywayMigrateTask>("testMigrate") {
+    url = "jdbc:postgresql://localhost:5432/mb_test?user=mbapp&password=mbapp_password"
+}
+
+tasks.register<org.flywaydb.gradle.task.FlywayCleanTask>("testClean") {
+    url = "jdbc:postgresql://localhost:5432/mb_test?user=mbapp&password=mbapp_password"
+}
+
 tasks.register<org.flywaydb.gradle.task.FlywayMigrateTask>("prodMigrate") {
     url = System.getenv("JDBC_DATABASE_URL")
 }

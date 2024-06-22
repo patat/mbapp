@@ -3,28 +3,53 @@ package io.initialcapacity.model
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-val BATTLE_MOVIES_COUNT = 16
+const val BATTLE_MOVIES_COUNT = 16
 class DataGateway(private val db: Database) {
-    //
-    fun getMovies() = transaction(db) {
-        MovieTable
-                .select { MovieTable.tmdbId greater 0 }
-                .limit(BATTLE_MOVIES_COUNT).map {
-                    it.toMovie()
-                }
-    }
+    fun getFreshMovies() = transaction(db) {
+        val battleCount = MovieBattleRelationTable.battleId.countDistinct().alias("battleCount")
+        val leastBattledMovieIds = (MovieTable leftJoin MovieBattleRelationTable)
+                .slice(MovieTable.id, battleCount)
+                .selectAll()
+                .groupBy(MovieTable.id)
+                .orderBy(battleCount, SortOrder.ASC_NULLS_FIRST)
+                .limit(BATTLE_MOVIES_COUNT)
+                .map { it[MovieTable.id] }
 
-    fun saveMovie(tmdbId: Int, title: String, overview: String, posterPath: String) = transaction(db) {
-        MovieTable.insert {
-            it[MovieTable.tmdbId] = tmdbId
-            it[MovieTable.title] = title
-            it[MovieTable.overview] = overview
-            it[MovieTable.posterPath] = posterPath
+        MovieTable.select {
+            MovieTable.id inList leastBattledMovieIds
+        }.map{
+            it.toMovie()
         }
     }
-    fun getBattleById(id: Long) = transaction(db) {
-        BattleTable
-                .select { BattleTable.id eq id }
+
+    fun saveMovie(movie: Movie) = transaction(db) {
+        val savedMovies = MovieTable.select {MovieTable.tmdbId eq movie.tmdbId}.map { it.toMovie() }
+
+        if (savedMovies.isNotEmpty()) {
+            savedMovies.forEach { savedMovie ->
+                MovieTable.update ({ MovieTable.id eq savedMovie.id }) {
+                    it[tmdbId] = movie.tmdbId
+                    it[title] = movie.title
+                    it[overview] = movie.overview
+                    it[posterPath] = movie.posterPath
+                }
+            }
+        } else {
+            MovieTable.insert {
+                it[tmdbId] = movie.tmdbId
+                it[title] = movie.title
+                it[overview] = movie.overview
+                it[posterPath] = movie.posterPath
+            }
+        }
+    }
+
+    fun getMovieByTmdbId(tmdbId: Int) = transaction {
+        MovieTable
+                .select { MovieTable.tmdbId eq tmdbId }
+                .limit(1).map {
+                    it.toMovie()
+                }[0]
     }
 
     fun createBattle() = transaction(db) {

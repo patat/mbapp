@@ -26,6 +26,10 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
 
     implementation("com.rabbitmq:amqp-client:$rabbitVersion")
+    implementation(project(mapOf("path" to ":components:results-awaiter")))
+    implementation(project(mapOf("path" to ":components:model")))
+
+    testImplementation("io.mockk:mockk:1.12.3")
 }
 
 task<JavaExec>("run") {

@@ -3,21 +3,23 @@ package io.initialcapacity.analyzer
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import io.initialcapacity.model.DataGateway
-import org.jetbrains.exposed.sql.Database
+import io.initialcapacity.queue.MessageQueue
 
-class ShowcaseMoviesWorker(private val db: Database) {
+class ShowcaseMoviesWorker(
+    private val gateway: DataGateway,
+    private val collectMoviesQueue: MessageQueue
+) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun setBattleMovies(battleId: Long) {
-        runBlocking {
             logger.info("starting setting battle movies.")
 
-            val gateway = DataGateway(db)
+            val movies = gateway.getFreshMovies()
 
-            val movies = gateway.getMovies()
             gateway.addMoviesToBattle(battleId, movies.map { it.id })
 
+            collectMoviesQueue.publishMessage("collect movies")
+
             logger.info("completed to set battle movies.")
-        }
     }
 }

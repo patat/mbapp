@@ -21,8 +21,9 @@ dependencies {
     implementation("com.zaxxer:HikariCP:$hikariVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.rabbitmq:amqp-client:$rabbitVersion")
+    implementation(project(mapOf("path" to ":components:model")))
 
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
+    testImplementation("io.mockk:mockk:1.12.3")
 }
 
 task<JavaExec>("run") {

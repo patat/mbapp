@@ -1,34 +1,16 @@
 services:
-#  basic-server:
-#    image: mbapp
-#    container_name: mbapp-web
-#    ports:
-#      - "8888:8888"
-#    environment:
-#      PORT: 8888
-#      APP: /opt/applications/basic-server.jar
-#  data-analyzer:
-#    image: mbapp
-#    container_name: mbapp-analyzer
-#    ports:
-#      - "8887:8887"
-#    environment:
-#      PORT: 8887
-#      APP: /opt/applications/data-analyzer-server.jar
-#  data-collector:
-#    image: mbapp
-#    container_name: mbapp-collector
-#    ports:
-#      - "8886:8886"
-#    environment:
-#      PORT: 8886
-#      APP: /opt/applications/data-collector-server.jar
-#    env_file: .env
   db:
     image: postgres:16
     ports:
       - "5432:5432"
-    env_file: .env.dev
+    environment:
+      POSTGRES_DB: 'mb_dev'
+      POSTGRES_USER: 'mbapp'
+      POSTGRES_PASSWORD: 'mbapp_password'
+      ADDITIONAL_POSTGRES_DBS: 'mb_test'
+    volumes:
+      - ./databases/init-scripts:/docker-entrypoint-initdb.d
+      - ./.docker-data/.pg-data:/var/lib/postgresql/data
   rabbitmq:
     image: rabbitmq:3.10.5-management
     container_name: mbapp-rabbit

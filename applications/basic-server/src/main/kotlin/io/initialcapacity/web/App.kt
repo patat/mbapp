@@ -1,9 +1,8 @@
 package io.initialcapacity.web
 
-import com.rabbitmq.client.ConnectionFactory
 import freemarker.cache.ClassTemplateLoader
 import io.initialcapacity.awaiter.ResultsAwaiter
-import io.ktor.http.*
+import io.initialcapacity.model.DataGateway
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
@@ -12,7 +11,6 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.freemarker.FreeMarker
 import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
-import io.ktor.server.netty.Netty
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.serialization.Serializable
@@ -25,19 +23,17 @@ import io.ktor.serialization.kotlinx.json.*
 import java.net.URI
 import io.initialcapacity.model.Movie
 import io.initialcapacity.queue.MessageQueue
+import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 
 fun Application.module(
-    dbConfig: DatabaseConfiguration,
-    collectMoviesQueue: MessageQueue,
+    resultsAwaiter: ResultsAwaiter,
     showcaseMoviesQueue: MessageQueue,
     nextRoundQueue: MessageQueue,
 
 ) {
     val logger = LoggerFactory.getLogger(this.javaClass)
-
-    val resultsAwaiter = ResultsAwaiter(dbConfig.db)
 
     install(ContentNegotiation) {
         json()
@@ -53,13 +49,6 @@ fun Application.module(
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
         staticResources("/static/scripts", "static/scripts")
-
-        get("/collect-movies") {
-            logger.info("publishing collect movies")
-            collectMoviesQueue.publishMessage("collect movies")
-
-            call.respondText("collect movies published!", ContentType.Text.Html)
-        }
 
         get("/showcase-movies") {
             val battleId = resultsAwaiter.createBattle()
@@ -95,29 +84,29 @@ fun Application.module(
 }
 
 @Serializable
-private data class ShowcaseMoviesMessage(
-      val battleId: Long
+data class ShowcaseMoviesMessage(
+    val battleId: Long
 )
 
 @Serializable
-private data class ShowcaseMoviesResponse(
+data class ShowcaseMoviesResponse(
         val battleId: Long,
         val movies: List<Movie>
 )
 
 @Serializable
-private data class NextRoundRequest(
-        val battleId: Long,
-        val roundId: Long?,
-        val winnerId: Long?,
+data class NextRoundRequest(
+    val battleId: Long,
+    val roundId: Long?,
+    val winnerId: Long?,
 )
 
 @Serializable
-private data class NextRoundMessage(
-        val battleId: Long,
-        val nextRoundId: Long,
-        val prevRoundId: Long?,
-        val winnerId: Long?,
+data class NextRoundMessage(
+    val battleId: Long,
+    val nextRoundId: Long,
+    val prevRoundId: Long?,
+    val winnerId: Long?,
 )
 
 private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String, String> {
@@ -128,18 +117,29 @@ private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String,
     return headers
 }
 
-fun startServer(
+fun webServer(
     port: Int,
-    rabbitUrl: URI,
-    dbUrl: String
-) {
-    val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
+    resultsAwaiter: ResultsAwaiter,
+    showcaseMoviesQueue: MessageQueue,
+    nextRoundQueue: MessageQueue,
+) = embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module(
+    resultsAwaiter,
+    showcaseMoviesQueue,
+    nextRoundQueue,
+)})
 
-    val collectMoviesQueue = MessageQueue(
-            rabbitUrl = rabbitUrl,
-            exchangeName = "collect-movies-exchange",
-            queueName = "collect-movies-queue"
-    )
+fun main() {
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    val port = System.getenv("PORT")?.toInt() ?: 8888
+    val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
+            ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
+
+    val dbUrl = System.getenv("JDBC_DATABASE_URL")
+            ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
+
+    val dbConfig = DatabaseConfiguration(dbUrl = dbUrl)
+    val dataGateway = DataGateway(dbConfig.db)
+    val resultsAwaiter = ResultsAwaiter(dataGateway)
 
     val showcaseMoviesQueue = MessageQueue(
             rabbitUrl = rabbitUrl,
@@ -153,22 +153,10 @@ fun startServer(
             queueName = "next-round-queue"
     )
 
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module(
-            dbConfig = dbConfig,
-            collectMoviesQueue = collectMoviesQueue,
-            showcaseMoviesQueue = showcaseMoviesQueue,
-            nextRoundQueue = nextRoundQueue,
-    ) }).start(wait = true)
-}
-
-fun main() {
-    TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    val port = System.getenv("PORT")?.toInt() ?: 8888
-    val rabbitUrl = System.getenv("CLOUDAMQP_URL")?.let(::URI)
-            ?: throw RuntimeException("Please set the CLOUDAMQP_URL environment variable")
-
-    val dbUrl = System.getenv("JDBC_DATABASE_URL")
-            ?: throw RuntimeException("Please set the JDBC_DATABASE_URL environment variable")
-
-    startServer(port = port, rabbitUrl = rabbitUrl, dbUrl = dbUrl)
+    webServer(
+        port,
+        resultsAwaiter,
+        showcaseMoviesQueue,
+        nextRoundQueue
+    ).start(wait = true)
 }

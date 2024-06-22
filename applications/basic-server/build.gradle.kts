@@ -27,7 +27,11 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.rabbitmq:amqp-client:$rabbitVersion")
 
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
+    testImplementation("io.ktor:ktor-client-core:$ktorVersion")
+    testImplementation("io.ktor:ktor-client-java:$ktorVersion")
+    testImplementation("io.mockk:mockk:1.12.3")
 }
 
 task<JavaExec>("run") {

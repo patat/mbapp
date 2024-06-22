@@ -11,7 +11,6 @@ include(
     "components:model",
     "components:queue",
 
-    "support:workflow-support",
     "support:rabbit-support",
 
     "databases:mb-db"
