@@ -16,8 +16,10 @@ class ShowcaseMoviesWorker(
 
             val movies = gateway.getFreshMovies()
 
-            gateway.addMoviesToBattle(battleId, movies.map { it.id })
-
+            if (movies.isNotEmpty()) {
+                gateway.addMoviesToBattle(battleId, movies.map { it.id })
+            }
+        
             collectMoviesQueue.publishMessage("collect movies")
 
             logger.info("completed to set battle movies.")

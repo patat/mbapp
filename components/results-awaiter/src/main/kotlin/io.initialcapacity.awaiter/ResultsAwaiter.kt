@@ -1,6 +1,5 @@
 package io.initialcapacity.awaiter
 
-import io.initialcapacity.model.BATTLE_MOVIES_COUNT
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import io.initialcapacity.model.DataGateway
