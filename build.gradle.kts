@@ -23,7 +23,3 @@ subprojects {
         testImplementation(kotlin("test-junit"))
     }
 }
-
-tasks.create("stage") {
-    dependsOn("assemble")
-}

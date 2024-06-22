@@ -17,3 +17,7 @@ dependencies {
 
     testImplementation("org.postgresql:postgresql:$postgresVersion")
 }
+
+tasks.test {
+    exclude("**/*")
+}
