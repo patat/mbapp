@@ -24,6 +24,7 @@ subprojects {
     }
 }
 
+
 tasks.create("stage") {
     dependsOn("assemble")
 }
