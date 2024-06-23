@@ -13,48 +13,39 @@ It uses the [Ktor](https://ktor.io) web framework, and runs on the [Netty](https
 HTML templates are written using [Freemarker](https://freemarker.apache.org).
 The codebase is tested with [JUnit](https://junit.org/) and uses [Gradle](https://gradle.org) to build a jarfile.
 
-## Getting Started
+## Run locally
 
-1.  Build a Java Archive (jar) file.
+1.  Start postgress and rabbit on docker (required to run the apps and the tests)
+    ```bash
+    docker compose up
+    ```
+1. Run flyway migrations on dev and test db's
+    ```bash
+    ./gradlew devMigrate
+    ./gradlew testMigrate
+    ```
+
+1.  Build and test the apps
     ```bash
     ./gradlew clean build
     ```
 
-1.  Configure the port that each server runs on.
-    ```bash
-    export PORT=8881
-    ```
-
 1.  Run the servers locally using the below examples.
 
+    Web server
+2. 
     ```bash
-    java -jar applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar
+    ./gradlew a:b:r
     ```
 
     Data collector
 
     ```bash
-    java -jar applications/data-collector-server/build/libs/data-collector-server-1.0-SNAPSHOT.jar
+    ./gradlew a:d-c:r
     ```
 
     Data analyzer
     
     ```bash
-    java -jar applications/data-analyzer-server/build/libs/data-analyzer-server-1.0-SNAPSHOT.jar
+    ./gradlew a:d-a:r
     ```
-    
-## Running with Docker
-
-1. Build with Docker.
-
-    ```bash
-    docker build -t mbapp . --platform linux/amd64
-    ```
-
-1.  Run with docker.
-
-    ```bash
-    docker run -e PORT=8881 -p 8881:8881 mbapp
-    ```
-
-That's a wrap for now.
