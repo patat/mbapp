@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import java.net.URI
 
 class ListenForShowcaseMoviesRequestsTest {
-    private val rabbitUrl = URI("amqp://localhost:1883")
+    private val rabbitUrl = URI("amqp://guest:guest@${System.getenv("RABBITMQ_HOST") ?: "localhost"}:${System.getenv("RABBITMQ_PORT") ?: "5672"}")
     private lateinit var dataGatewayMock: DataGateway
     private lateinit var collectMoviesQueueMock: MessageQueue
     private lateinit var showcaseMoviesQueue: MessageQueue

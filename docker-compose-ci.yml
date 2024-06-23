@@ -1,0 +1,9 @@
+services:
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: 'mb_test'
+      POSTGRES_USER: 'mbapp'
+      POSTGRES_PASSWORD: 'mbapp_password'
