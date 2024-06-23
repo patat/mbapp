@@ -9,6 +9,7 @@ val exposedVersion: String by project
 val hikariVersion: String by project
 val postgresVersion: String by project
 val rabbitVersion: String by project
+val mockkVersion: String by project
 
 dependencies {
     implementation(project(":components:data-analyzer"))
@@ -29,7 +30,7 @@ dependencies {
     implementation(project(mapOf("path" to ":components:results-awaiter")))
     implementation(project(mapOf("path" to ":components:model")))
 
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 task<JavaExec>("run") {

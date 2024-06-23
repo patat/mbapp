@@ -9,6 +9,7 @@ val rabbitVersion: String by project
 val exposedVersion: String by project
 val hikariVersion: String by project
 val postgresVersion: String by project
+val mockkVersion: String by project
 
 dependencies {
     implementation(project(":components:results-awaiter"))
@@ -31,7 +32,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
     testImplementation("io.ktor:ktor-client-core:$ktorVersion")
     testImplementation("io.ktor:ktor-client-java:$ktorVersion")
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
 task<JavaExec>("run") {
