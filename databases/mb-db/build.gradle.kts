@@ -41,6 +41,10 @@ tasks.register<org.flywaydb.gradle.task.FlywayMigrateTask>("prodMigrate") {
     url = System.getenv("JDBC_DATABASE_URL")
 }
 
+tasks.create("stage") {
+    dependsOn("assemble")
+}
+
 tasks {
     jar {
         manifest { attributes("Main-Class" to "io.initialcapacity.migrate.FlywayMigrateKt") }

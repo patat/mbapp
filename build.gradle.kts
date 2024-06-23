@@ -8,7 +8,7 @@ repositories {
 }
 
 subprojects {
-    if (listOf("applications", "components", "support").contains(name)) return@subprojects
+    if (listOf("applications", "components", "support", "databases").contains(name)) return@subprojects
 
     apply(plugin = "kotlin")
 
