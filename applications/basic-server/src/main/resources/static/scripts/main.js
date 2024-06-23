@@ -2,6 +2,7 @@
 (function() {
     const state = {};
     document.addEventListener('DOMContentLoaded', function () {
+        state.body = document.querySelector('body');
         state.root = selectElement('app-root');
         const newBattleBtn = selectElement('new-battle-btn');
         console.log('newBattleBtn', newBattleBtn);
@@ -31,6 +32,8 @@
     }
 
     function renderNextRound(data) {
+        state.roundCnt = state.roundCnt ? state.roundCnt + 1 : 0;
+
         fetchNextRound({
             battleId: state.battleId,
             roundId: data.roundId,
@@ -41,7 +44,7 @@
 
             if (!round.movie1Id && !round.movie2Id) {
                 const winner = state.movies.find(movie => movie.id === round.winnerId);
-                return render(Movie(winner))
+                return render(Winner(winner), 'dark');
             }
 
             const movie1 = state.movies.find(movie => movie.id === round.movie1Id);
@@ -69,15 +72,16 @@
         const showcaseContainer = document.createElement('div');
         showcaseContainer.classList.add('showcase-container');
 
-        const showcaseContainerCover = document.createElement('div');
-        showcaseContainerCover.classList.add('showcase-container__cover');
+        const showcaseContainerBtn = document.createElement('div');
+        showcaseContainerBtn.classList.add('showcase-container__btn');
 
         const fightBtn = document.createElement('button');
-        fightBtn.textContent = 'FIGHT!'
+        fightBtn.classList.add('sec-btn');
+        fightBtn.textContent = 'FIGHT !';
         fightBtn.addEventListener('click', onFightBtnClick);
 
-        showcaseContainerCover.append(fightBtn);
-        showcaseContainer.append(...movies.map(MoviePoster), showcaseContainerCover);
+        showcaseContainerBtn.append(fightBtn);
+        showcaseContainer.append(...movies.map(MoviePoster), showcaseContainerBtn);
 
         return showcaseContainer;
     }
@@ -93,23 +97,45 @@
         const roundContainer = document.createElement('div');
         roundContainer.classList.add('round-container');
 
+        const vs = document.createElement('div');
+        vs.classList.add('vs');
+        vs.textContent = 'VS';
+
         roundContainer.append(
             Movie(movie1),
+            vs,
             Movie(movie2)
         );
 
         return roundContainer;
     }
 
-    function Movie(movie) {
+    function Movie(movie, reverse) {
         const movieCard = document.createElement('div');
         movieCard.classList.add('movie-card');
 
-        const poster = MoviePoster(movie);
+        if (reverse) {
+            movieCard.classList.add('movie-card--reverse');
+        }
+
         const title = document.createElement('div');
+        title.classList.add('movie-card__title');
         title.textContent = movie.title;
 
-        movieCard.append(poster, title);
+        const fightBar = document.createElement('div');
+        fightBar.classList.add('movie-card__fight-bar');
+
+        const poster = MoviePoster(movie);
+        const overview = document.createElement('p');
+        overview.classList.add('movie-card__overview');
+        overview.textContent = movie.overview;
+
+        const info = document.createElement('div');
+        info.classList.add('movie-card__info');
+
+        info.append(poster, overview);
+
+        movieCard.append(title, fightBar, info);
 
         movieCard.addEventListener('click', () => {
             renderNextRound({
@@ -121,7 +147,31 @@
         return movieCard;
     }
 
-    function render(content) {
+    function Winner(movie) {
+        const winnerContainer = document.createElement('div');
+        winnerContainer.classList.add('winner');
+
+        const winnerText = document.createElement('img');
+        winnerText.src = '/static/images/winner.svg';
+        winnerText.classList.add('winner__text');
+
+        const poster = MoviePoster(movie);
+
+        winnerContainer.append(
+            winnerText,
+            poster
+        );
+
+        return winnerContainer;
+    }
+
+    function render(content, theme) {
+        if (theme === 'dark' && !state.body.classList.contains('theme-dark')) {
+            state.body.classList.add('theme-dark');
+        } else if (theme !== 'dark' && state.body.classList.contains('theme-dark')) {
+            state.body.classList.remove('theme-dark');
+        }
+
         if (Array.isArray(content)) {
             state.root.replaceChildren(...content);
 

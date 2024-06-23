@@ -33,7 +33,7 @@ The codebase is tested with [JUnit](https://junit.org/) and uses [Gradle](https:
 1.  Run the servers locally using the below examples.
 
     Web server
-2. 
+
     ```bash
     ./gradlew a:b:r
     ```
@@ -49,3 +49,6 @@ The codebase is tested with [JUnit](https://junit.org/) and uses [Gradle](https:
     ```bash
     ./gradlew a:d-a:r
     ```
+1. Open the app at http://localhost:8888
+
+1. Open in browser http://localhost:8888/collect-movies to populate the db with initial data 

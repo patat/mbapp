@@ -1,15 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400;0,700;1,400&family=Bowlby+One&display=swap');
-
+@font-face {font-family:"Gamestation-Storm";src:url("fonts/GamestationStorm.eot?") format("eot"),url("fonts/GamestationStorm.woff") format("woff"),url("fonts/GamestationStorm.ttf") format("truetype"),url("fonts/GamestationStorm.svg#Gamestation-Storm") format("svg");font-weight:normal;font-style:normal;}
+@font-face {font-family:"Potra";src:url("fonts/Potra.eot?") format("eot"),url("fonts/Potra.woff") format("woff"),url("fonts/Potra.ttf") format("truetype"),url("fonts/Potra.svg#Potra") format("svg");font-weight:normal;font-style:normal;}
 :root {
     --white: #FFFFFF;
-    --orange: #7F52FF;
-    --black: #414141;
-    --blue: #3e53a6;
+    --dark: #000117;
+    --magenta: #FF00FF;
+    --grey: #F7F7F7;
+    --textFont: 'Gamestation-Storm', monospace;
+    --headerFont: 'Potra', sans-serif;
 }
 
 html {
     font-size: 16px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: var(--textFont);
     color: var(--black);
     box-sizing: border-box;
 }
@@ -25,15 +27,19 @@ body {
 }
 
 header {
-    padding: 1rem;
+    padding: 24px 40px;
+}
+
+.sub-logo {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 23.14px;
+    letter-spacing: -0.01em;
+    text-align: left;
 }
 
 main {
     flex: 1;
-}
-
-section {
-    padding: 2rem 0;
 }
 
 footer {
@@ -43,50 +49,195 @@ footer {
 }
 
 .container {
-    padding: 0 3rem;
     margin: 0 auto;
-    max-width: 65rem;
+    max-width: 1116px;
+    padding-bottom: 24px;
+}
+
+.manual-list {
+    list-style-type: decimal;
+    margin-left: 28px;
+    margin-bottom: 20px;
+}
+
+.manual-container {
+    display: flex;
+    height: calc(100vh - 248px);
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.manual {
+    margin-right: 8vw;
+}
+
+.manual-list__item {
+    font-size: 28px;
+    line-height: 32.4px;
+
+    padding-left: 28px;
+    padding-bottom: 36px;
+}
+
+.main-btn {
+    display: inline-block;
+    border: 1px solid var(--magenta);
+    border-radius: 8px;
+    background-color: transparent;
+    padding: 8px 20px;
+
+    font-family: var(--headerFont);
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 42.66px;
+    color: var(--magenta);
+
+    cursor: pointer;
 }
 
 .movie-poster {
-    height: 250px;
+    width: 152px;
+    height: 220px;
     background-size: cover;
+    border-radius: 8px;
 }
 
 .showcase-container {
-    position: relative;
     display: grid;
-    gap: 16px;
-    grid-template-rows: repeat(4, 1fr);
-    grid-template-columns: repeat(4, 1fr);
+    max-width: 960px;
+    margin: 0 auto;
+    padding-top: 6px;
+    gap: 8px;
+    grid-template-rows: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
 }
 
-.showcase-container__cover {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
+.showcase-container__btn {
+    grid-row: 3;
+    grid-column: 5 / 7;
 
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
 
+.sec-btn {
+    display: inline-block;
+    border: 1px solid var(--dark);
+    border-radius: 8px;
+    background-color: transparent;
+    padding: 8px 20px;
+
+    font-family: var(--headerFont);
+    font-size: 36px;
+    font-weight: 300;
+    line-height: 42.66px;
+    color: var(--dark);
+
+    cursor: pointer;
+}
+
 .round-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
+    height: calc(100vh - 300px);
+}
+
+.vs {
+    font-family: var(--headerFont);
+    font-size: 80px;
+    font-weight: 300;
+    line-height: 94.8px;
 }
 
 .movie-card {
+    width: 454px;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0px 8px 12px 0px #FF00FF26;
+
+    cursor: pointer;
+}
+
+.movie-card .movie-poster {
+    width: 184px;
+    height: 254px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.movie-card__title {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 31.2px;
+    padding-bottom: 8px;
+}
+
+.movie-card__fight-bar {
+    height: 22px;
+    border-radius: 48px;
+    background-color: var(--grey);
+    margin-bottom: 16px;
+}
+
+.movie-card__info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.movie-card__overview {
+    font-size: 16px;
+    line-height: 20.8px;
+    width: 222px;
+    height: 254px;
+    display: -webkit-box;
+    -webkit-line-clamp: 12;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.winner {
+    padding-top: 70px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
 
-    width: 200px;
+.winner .movie-poster {
+    width: 304px;
+    height: 404px;
+    border-radius: 16px;
+}
 
-    padding: 5px;
-    border: 1px solid rgba(0, 0, 0, 0.4);
+.winner__text {
+    margin-bottom: 42px;
+}
+
+.logo {
+    font-family: var(--headerFont);
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 47.4px;
+}
+
+.theme-dark {
+    color: var(--white);
+    background-color: var(--dark);
+}
+
+.logo-dark {
+    margin-left: -6px;
+    display: none;
+}
+
+.theme-dark .logo-dark {
+    display: block;
+}
+
+.theme-dark .logo {
+    display: none;
 }
 
 

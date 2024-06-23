@@ -9,20 +9,20 @@
         <link rel="icon" type="image/svg" href="/static/images/favicon.svg">
         <title>Movie Battle App</title>
     </head>
-    <body>
+    <body class="theme-dark">
+
     <header>
-        <div class="container">
-            <h1>Movie Battle App</h1>
+        <div class="logo-group">
+            <p class="logo">MOVIE BATTLE</p>
+            <img class="logo-dark" src="/static/images/logo_dark_full.svg" />
+            <p class="sub-logo">Let movies fight to be watched</p>
         </div>
     </header>
+
     <main>
         <#nested>
     </main>
-    <footer>
-        <div class="container">
-            Let movies fight to be watched.
-        </div>
-    </footer>
+
     <script src="/static/scripts/main.js"></script>
     </body>
     </html>
