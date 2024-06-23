@@ -40,3 +40,15 @@ tasks.register<org.flywaydb.gradle.task.FlywayCleanTask>("testClean") {
 tasks.register<org.flywaydb.gradle.task.FlywayMigrateTask>("prodMigrate") {
     url = System.getenv("JDBC_DATABASE_URL")
 }
+
+tasks {
+    jar {
+        manifest { attributes("Main-Class" to "io.initialcapacity.migrate.FlywayMigrateKt") }
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        from({
+            configurations.runtimeClasspath.get()
+                    .filter { it.name.endsWith("jar") }
+                    .map(::zipTree)
+        })
+    }
+}
