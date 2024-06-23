@@ -48,7 +48,3 @@ tasks {
         })
     }
 }
-
-tasks.test {
-    exclude("**/*")
-}

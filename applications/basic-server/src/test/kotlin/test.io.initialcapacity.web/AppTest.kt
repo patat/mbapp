@@ -51,12 +51,12 @@ class AppTest {
         server.stop(50, 50)
     }
 
-//    @Test
-//    fun testRootOk() = runBlocking {
-//        val response = client.get("http://localhost:$port/")
-//        assertEquals(HttpStatusCode.OK, response.status)
-//        assertContains(response.bodyAsText(),"Let movies fight to be watched")
-//    }
+    @Test
+    fun testRootOk() = runBlocking {
+        val response = client.get("http://localhost:$port/")
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertContains(response.bodyAsText(),"Let movies fight to be watched")
+    }
 
     @Test
     fun testShowcaseMovies() = runBlocking {
@@ -77,38 +77,38 @@ class AppTest {
         )
     }
 
-//    @Test
-//    fun testNextRound() = runBlocking {
-//        val mockBattleId: Long = 12345
-//        val mockRoundId: Long = 1;
-//        val mockRound = Round(id = mockRoundId, battleId = mockBattleId, movie1Id = 12, movie2Id = 13, winnerId = 12);
-//
-//        every { dataGatewayMock.createRound(mockBattleId) } returns mockRoundId
-//        every { dataGatewayMock.getRoundById(mockRoundId) } returns mockRound
-//        every { nextRoundQueueMock.getProperty("publishMessage") } returns {
-//            message: String -> assertEquals(message, Json.encodeToString(
-//                NextRoundMessage(
-//                        battleId = mockBattleId,
-//                        nextRoundId = mockRoundId,
-//                        prevRoundId = null,
-//                        winnerId = null,
-//                )
-//            ))
-//        }
-//
-//        val response = client.post("http://localhost:$port/next-round") {
-//            headers {
-//                contentType(ContentType.Application.Json)
-//                setBody(
-//                        """{"battleId": $mockBattleId, "roundId": null, "winnerId": null}"""
-//                )
-//            }
-//        }
-//
-//        assertEquals(HttpStatusCode.OK, response.status)
-//        assertEquals(
-//            Json.encodeToString(mockRound),
-//            response.bodyAsText()
-//        )
-//    }
+    @Test
+    fun testNextRound() = runBlocking {
+        val mockBattleId: Long = 12345
+        val mockRoundId: Long = 1;
+        val mockRound = Round(id = mockRoundId, battleId = mockBattleId, movie1Id = 12, movie2Id = 13, winnerId = 12);
+
+        every { dataGatewayMock.createRound(mockBattleId) } returns mockRoundId
+        every { dataGatewayMock.getRoundById(mockRoundId) } returns mockRound
+        every { nextRoundQueueMock.getProperty("publishMessage") } returns {
+            message: String -> assertEquals(message, Json.encodeToString(
+                NextRoundMessage(
+                        battleId = mockBattleId,
+                        nextRoundId = mockRoundId,
+                        prevRoundId = null,
+                        winnerId = null,
+                )
+            ))
+        }
+
+        val response = client.post("http://localhost:$port/next-round") {
+            headers {
+                contentType(ContentType.Application.Json)
+                setBody(
+                        """{"battleId": $mockBattleId, "roundId": null, "winnerId": null}"""
+                )
+            }
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(
+            Json.encodeToString(mockRound),
+            response.bodyAsText()
+        )
+    }
 }
