@@ -14,5 +14,7 @@ jobs:
           java-version: 21
           cache: 'gradle'
       - uses: hoverkraft-tech/compose-action@v2.0.1
+      - name: "run migrations"
+        run: ./gradlew testMigrate
       - name: "build"
         run: ./gradlew build
