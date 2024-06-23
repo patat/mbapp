@@ -17,4 +17,4 @@ jobs:
       - name: "run migrations"
         run: ./gradlew testMigrate
       - name: "build"
-        run: ./gradlew build
+        run: ./gradlew build --console='verbose' --stacktrace

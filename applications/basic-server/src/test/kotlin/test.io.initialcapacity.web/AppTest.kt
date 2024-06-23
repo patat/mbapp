@@ -58,24 +58,24 @@ class AppTest {
         assertContains(response.bodyAsText(),"Let movies fight to be watched")
     }
 
-//    @Test
-//    fun testShowcaseMovies() = runBlocking {
-//        val mockMovie = Movie(id = 54321, tmdbId=1, title="Test movie", overview="Test overview", posterPath="/test-poster");
-//        val mockBattleId: Long = 12345;
-//        every { dataGatewayMock.createBattle() } returns mockBattleId
-//        every { dataGatewayMock.getBattleMovies(mockBattleId) } returns listOf(mockMovie)
-//        every { showcaseMoviesQueueMock.getProperty("publishMessage") } returns {
-//            message: String -> assertEquals(message, Json.encodeToString(ShowcaseMoviesMessage(battleId = mockBattleId)))
-//        }
-//
-//        val response = client.get("http://localhost:$port/showcase-movies")
-//
-//        assertEquals(HttpStatusCode.OK, response.status)
-//        assertEquals(
-//            Json.encodeToString(ShowcaseMoviesResponse(battleId = mockBattleId, movies = listOf(mockMovie))),
-//            response.bodyAsText(),
-//        )
-//    }
+    @Test
+    fun testShowcaseMovies() = runBlocking {
+        val mockMovie = Movie(id = 54321, tmdbId=1, title="Test movie", overview="Test overview", posterPath="/test-poster");
+        val mockBattleId: Long = 12345;
+        every { dataGatewayMock.createBattle() } returns mockBattleId
+        every { dataGatewayMock.getBattleMovies(mockBattleId) } returns listOf(mockMovie)
+        every { showcaseMoviesQueueMock.getProperty("publishMessage") } returns {
+            message: String -> assertEquals(message, Json.encodeToString(ShowcaseMoviesMessage(battleId = mockBattleId)))
+        }
+
+        val response = client.get("http://localhost:$port/showcase-movies")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals(
+            Json.encodeToString(ShowcaseMoviesResponse(battleId = mockBattleId, movies = listOf(mockMovie))),
+            response.bodyAsText(),
+        )
+    }
 
 //    @Test
 //    fun testNextRound() = runBlocking {
