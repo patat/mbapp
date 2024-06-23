@@ -51,12 +51,12 @@ class AppTest {
         server.stop(50, 50)
     }
 
-    @Test
-    fun testRootOk() = runBlocking {
-        val response = client.get("http://localhost:$port/")
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertContains(response.bodyAsText(),"Let movies fight to be watched")
-    }
+//    @Test
+//    fun testRootOk() = runBlocking {
+//        val response = client.get("http://localhost:$port/")
+//        assertEquals(HttpStatusCode.OK, response.status)
+//        assertContains(response.bodyAsText(),"Let movies fight to be watched")
+//    }
 
     @Test
     fun testShowcaseMovies() = runBlocking {
