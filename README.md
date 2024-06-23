@@ -1,8 +1,6 @@
-# Kotlin ktor starter
+# Movie Battle App
 
-An [application continuum](https://www.appcontinuum.io/) style example using Kotlin and Ktor
-that includes a single web application with two background workers.
-
+### Components
 * Basic web application
 * Data analyzer
 * Data collector
