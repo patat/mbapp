@@ -5,7 +5,15 @@ plugins {
 val flywayMigration by configurations.creating
 val postgresVersion: String by project
 
+task<JavaExec>("run") {
+    classpath = files(tasks.jar)
+    environment("JDBC_DATABASE_URL", "jdbc:postgresql://localhost:5432/mb_dev?user=mbapp&password=mbapp_password")
+}
+
 dependencies {
+    implementation("org.flywaydb:flyway-core:8.5.7")
+    implementation("org.postgresql:postgresql:$postgresVersion")
+
     flywayMigration("org.postgresql:postgresql:$postgresVersion")
 }
 
