@@ -17,10 +17,17 @@ jobs:
       - name: "run migrations"
         run: ./gradlew testMigrate
       - name: "build"
-        run: ./gradlew build --console='verbose' --stacktrace
-      - name: Archive test results
+        run: ./gradlew build
+      - name: Archive test results basic-server
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-report
+          name: basic-server-test-report
           path: applications/basic-server/build/reports/tests/test/
+      - name: Archive test results data-analyzer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-analyzer-server-test-report
+          path: applications/data-analyzer-server/build/reports/tests/test/
+
