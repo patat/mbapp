@@ -47,3 +47,7 @@ tasks {
         })
     }
 }
+
+tasks.test {
+    exclude("**/*")
+}

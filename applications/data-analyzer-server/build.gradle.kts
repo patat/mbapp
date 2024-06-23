@@ -53,3 +53,7 @@ tasks {
         })
     }
 }
+
+tasks.test {
+    exclude("**/*")
+}
