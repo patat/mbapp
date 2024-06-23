@@ -30,7 +30,7 @@ dependencies {
 task<JavaExec>("run") {
     classpath = files(tasks.jar)
     environment("JDBC_DATABASE_URL", "jdbc:postgresql://localhost:5432/mb_dev?user=mbapp&password=mbapp_password")
-    environment("CLOUDAMQP_URL", "amqp://localhost:5672")
+    environment("CLOUDAMQP_URL", "amqp://localhost:1883")
 }
 
 tasks.create("stage") {

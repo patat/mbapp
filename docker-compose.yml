@@ -15,8 +15,8 @@ services:
     image: rabbitmq:3.10.5-management
     container_name: mbapp-rabbit
     ports:
-      - '5672:5672'
-      - '15672:15672'
+      - '1883:5672'
+      - '11883:15672'
     volumes:
       - ./.docker-data/.rabbit-data:/var/lib/rabbitmq/
       - ./.docker-data/.rabbit-log:/var/log/rabbitmq
