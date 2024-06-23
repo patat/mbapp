@@ -18,3 +18,8 @@ jobs:
         run: ./gradlew testMigrate
       - name: "build"
         run: ./gradlew build --console='verbose' --stacktrace
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: applications/basic-server/build/reports/tests/test/index.html
